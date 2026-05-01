@@ -59,7 +59,7 @@ export default function ResultCard({ total, tier, onReset }: Props) {
 
   // 멘트는 컴포넌트 마운트 시 한 번만 결정 (탭해도 바뀌지 않음)
   const [comment] = useState(() => pickComment(tier));
-  const lastTapRef = useRef(0);
+  const pendingTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // sighKey: 탭할 때마다 증가 → key prop으로 전달해 애니메이션 재실행
   const [sighKey, setSighKey] = useState(0);
@@ -86,15 +86,19 @@ export default function ResultCard({ total, tier, onReset }: Props) {
 
   // 화면 탭 시 등급별로 다른 이펙트 실행
   function handleTap() {
-    const now = Date.now();
-    if (now - lastTapRef.current < 400) return;
-    lastTapRef.current = now;
+    // 이전 파티클 및 대기 중인 타이머 모두 취소 후 새로 시작 — 누적 방지
+    confetti.reset();
+    pendingTimers.current.forEach(clearTimeout);
+    pendingTimers.current = [];
+
     if (tier === 'perfect') {
       // 꽃가루 + 양쪽 축포 + 긴 진동
       vibrate([100, 50, 200, 50, 300]);
       confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-      setTimeout(() => confetti({ particleCount: 60, angle: 60,  spread: 55, origin: { x: 0, y: 0.7 } }), 250);
-      setTimeout(() => confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1, y: 0.7 } }), 400);
+      pendingTimers.current.push(
+        setTimeout(() => confetti({ particleCount: 60, angle: 60,  spread: 55, origin: { x: 0, y: 0.7 } }), 250),
+        setTimeout(() => confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1, y: 0.7 } }), 400),
+      );
 
     } else if (tier === 'good') {
       // 초록 꽃가루 + 짧은 진동
@@ -107,7 +111,7 @@ export default function ResultCard({ total, tier, onReset }: Props) {
       triggerShake(false);
       setSighKey(k => k + 1);
       setShowSigh(true);
-      setTimeout(() => setShowSigh(false), 3600); // CSS 애니메이션(3.5s)보다 약간 길게
+      pendingTimers.current.push(setTimeout(() => setShowSigh(false), 3600));
 
     } else if (tier === 'bad') {
       // 쓰레기통 이모지 파티클 + 중간 진동
@@ -122,9 +126,9 @@ export default function ResultCard({ total, tier, onReset }: Props) {
       triggerShake(true);
       const skull = confetti.shapeFromText({ text: '💀', scalar: 2 });
       [0.2, 0.5, 0.8].forEach((x, i) => {
-        setTimeout(() => {
+        pendingTimers.current.push(setTimeout(() => {
           confetti({ shapes: [skull], particleCount: 50, spread: 360, startVelocity: 28, scalar: 2, origin: { x, y: 0.5 } });
-        }, i * 160);
+        }, i * 160));
       });
     }
   }
