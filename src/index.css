@@ -35,7 +35,13 @@ button {
   font-family: inherit;
 }
 
-.option-btn:hover,
+@media (hover: hover) {
+  .option-btn:hover {
+    border-color: #374151 !important;
+    background: #F3F4F6 !important;
+  }
+}
+
 .option-btn:active {
   border-color: #374151 !important;
   background: #F3F4F6 !important;
