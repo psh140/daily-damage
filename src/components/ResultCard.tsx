@@ -66,6 +66,15 @@ export default function ResultCard({ total, tier, onReset }: Props) {
   // 탭마다 shapeFromText 재호출 방지용 — 마운트 시 한 번만 생성
   const skullShape = useRef<confetti.Shape | null>(null);
   const trashShape = useRef<confetti.Shape | null>(null);
+  // 현재 활성 파티클 추정치 — 이 값이 임계치 초과 시 탭 무시
+  const activeParticles = useRef(0);
+  const PARTICLE_THRESHOLD = 200;
+  const PARTICLE_LIFETIME_MS = 2000;
+
+  function trackParticles(count: number) {
+    activeParticles.current += count;
+    setTimeout(() => { activeParticles.current -= count; }, PARTICLE_LIFETIME_MS);
+  }
 
   useEffect(() => {
     const canvas = document.createElement('canvas');
@@ -108,9 +117,11 @@ export default function ResultCard({ total, tier, onReset }: Props) {
   function handleTap() {
     const fire = fireConfetti.current;
     if (!fire) return;
+    if (activeParticles.current >= PARTICLE_THRESHOLD) return;
 
     if (tier === 'perfect') {
       vibrate([100, 50, 200, 50, 300]);
+      trackParticles(150);
       fire({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       pendingTimers.current.push(
         setTimeout(() => fire({ particleCount: 35, angle: 60,  spread: 55, origin: { x: 0, y: 0.7 } }), 250),
@@ -119,6 +130,7 @@ export default function ResultCard({ total, tier, onReset }: Props) {
 
     } else if (tier === 'good') {
       vibrate([100]);
+      trackParticles(25);
       fire({ particleCount: 25, spread: 50, origin: { y: 0.65 }, colors: ['#16A34A', '#22C55E', '#86EFAC', '#FFFFFF'] });
 
     } else if (tier === 'meh') {
@@ -130,11 +142,13 @@ export default function ResultCard({ total, tier, onReset }: Props) {
 
     } else if (tier === 'bad') {
       vibrate([200, 50, 100]);
+      trackParticles(12);
       triggerShake(false);
       fire({ shapes: [trashShape.current!], particleCount: 12, spread: 180, origin: { y: 0.5 }, startVelocity: 20, scalar: 2 });
 
     } else if (tier === 'broken') {
       vibrate([500, 100, 500]);
+      trackParticles(30);
       triggerShake(true);
       [0.2, 0.5, 0.8].forEach((x, i) => {
         pendingTimers.current.push(setTimeout(() => {
