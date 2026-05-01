@@ -60,6 +60,7 @@ export default function QuestionCard({ question, index, total, onAnswer }: Props
         {question.options.map((option, i) => (
           <button
             key={`${question.id}-${i}`}
+            className="option-btn"
             onClick={() => onAnswer(option.score)}
             style={{
               padding: '1rem 1.25rem',
@@ -72,24 +73,7 @@ export default function QuestionCard({ question, index, total, onAnswer }: Props
               cursor: 'pointer',
               lineHeight: '1.55',
               transition: 'border-color 0.12s, background 0.12s',
-              WebkitAppearance: 'none', // iOS Safari 기본 버튼 스타일 제거
-            }}
-            // 마우스/터치 hover 효과를 인라인으로 처리 (CSS 클래스 없이)
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = '#374151';
-              e.currentTarget.style.background = '#F3F4F6';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = '#E5E7EB';
-              e.currentTarget.style.background = '#FAFAFA';
-            }}
-            onTouchStart={e => {
-              e.currentTarget.style.borderColor = '#374151';
-              e.currentTarget.style.background = '#F3F4F6';
-            }}
-            onTouchEnd={e => {
-              e.currentTarget.style.borderColor = '#E5E7EB';
-              e.currentTarget.style.background = '#FAFAFA';
+              WebkitAppearance: 'none',
             }}
           >
             {option.text}

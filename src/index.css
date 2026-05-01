@@ -1,36 +1,66 @@
+/* =============================================
+   전역 초기화
+   ============================================= */
+
+/* 모든 요소에 적용 */
 * {
+  /* padding/border가 width 안에 포함되게 — 레이아웃 계산이 훨씬 쉬워짐 */
   box-sizing: border-box;
+  /* 브라우저 기본 여백 제거 */
   margin: 0;
   padding: 0;
+  /* 모바일에서 버튼/링크 탭할 때 파란 하이라이트 없애기 */
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
+  /* 시스템 기본 폰트 우선 사용, 한글은 Noto Sans KR */
   font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+  /* 화면이 짧아도 body가 최소 화면 전체 높이 차지 */
   min-height: 100vh;
+  /* 텍스트 드래그 선택 방지 (탭 앱이라 선택되면 어색함) */
   user-select: none;
-  -webkit-user-select: none;
+  -webkit-user-select: none; /* Safari용 */
+  /* 가로 스크롤 막기 */
   overflow-x: hidden;
 }
 
+/* React가 앱을 렌더링하는 루트 div */
 #root {
   min-height: 100vh;
 }
 
+/* button은 기본적으로 폰트를 상속 안 해서 명시적으로 지정 */
 button {
   font-family: inherit;
 }
 
+.option-btn:hover,
+.option-btn:active {
+  border-color: #374151 !important;
+  background: #F3F4F6 !important;
+}
+
+
+/* =============================================
+   흔들림 애니메이션 (meh / bad / broken 탭 이펙트)
+   ============================================= */
+
+/* 일반 흔들림 — meh, bad 등급용 */
+/* @keyframes: 애니메이션의 각 단계(%)별 상태를 정의 */
+/* translateX: 좌우로 이동. 양수=오른쪽, 음수=왼쪽 */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  15%  { transform: translateX(-10px); }
-  30%  { transform: translateX(10px); }
+  0%, 100% { transform: translateX(0); }    /* 시작/끝: 제자리 */
+  15%  { transform: translateX(-10px); }    /* 왼쪽 */
+  30%  { transform: translateX(10px); }     /* 오른쪽 */
   45%  { transform: translateX(-8px); }
   60%  { transform: translateX(8px); }
-  75%  { transform: translateX(-4px); }
+  75%  { transform: translateX(-4px); }     /* 점점 줄어들며 멈춤 */
   90%  { transform: translateX(4px); }
 }
 
+/* 강한 흔들림 — broken 등급용. 좌우+상하+회전까지 섞어서 더 격렬하게 */
+/* translate(x, y): 좌우+상하 동시 이동 / rotate: 회전 (deg=도) */
 @keyframes shake-intense {
   0%,  100% { transform: translate(0, 0) rotate(0deg); }
   10%  { transform: translate(-20px, -5px) rotate(-1.5deg); }
@@ -44,14 +74,24 @@ button {
   90%  { transform: translate(-2px,   0); }
 }
 
+/* 클래스를 붙이면 해당 애니메이션 실행 (JS에서 classList.add로 제어) */
 .shake         { animation: shake         0.5s ease-in-out; }
 .shake-intense { animation: shake-intense 0.7s ease-in-out; }
 
+
+/* =============================================
+   등장 애니메이션
+   ============================================= */
+
+/* 아래서 위로 살짝 올라오며 나타남 — 질문 텍스트에 사용 */
+/* opacity: 투명도 (0=투명, 1=불투명) */
+/* translateY: 상하 이동. 양수=아래, 음수=위 */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(20px); } /* 20px 아래에서 시작 */
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* fadeUp보다 이동거리가 커서 더 역동적 — 결과 화면 전체에 사용 */
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(40px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -60,24 +100,37 @@ button {
 .fade-up  { animation: fadeUp  0.3s ease-out; }
 .slide-up { animation: slideUp 0.45s ease-out; }
 
+
+/* =============================================
+   한숨 텍스트 애니메이션 (meh 등급 탭 시)
+   ============================================= */
+
+/* 아래서 올라오며 나타났다가, 위로 올라가며 사라짐 */
 @keyframes sighAnim {
-  0%   { opacity: 0; transform: translateY(6px); }
-  12%  { opacity: 1; transform: translateY(0); }
-  80%  { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-8px); }
+  0%   { opacity: 0; transform: translateY(6px); }  /* 투명하게 시작 */
+  12%  { opacity: 1; transform: translateY(0); }     /* 빠르게 등장 */
+  80%  { opacity: 1; transform: translateY(0); }     /* 오래 유지 */
+  100% { opacity: 0; transform: translateY(-8px); }  /* 위로 사라짐 */
 }
 
 .sigh-text {
-  animation: sighAnim 3.5s ease-in-out forwards;
+  animation: sighAnim 3.5s ease-in-out forwards; /* forwards: 끝난 후 마지막 상태(투명) 유지 */
   font-size: 1.6rem;
   font-weight: 700;
-  pointer-events: none;
-  white-space: nowrap;
+  pointer-events: none; /* 이 텍스트 위에서 탭/클릭해도 아래 요소로 이벤트 통과 */
+  white-space: nowrap;  /* 줄바꿈 없이 한 줄로 */
 }
 
+
+/* =============================================
+   로딩 점 애니메이션 (현재 미사용, 추후 AI 연동 시 활용)
+   ============================================= */
+
+/* 투명도가 왔다갔다 — 깜빡이는 효과 */
 @keyframes dotPulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.3; }
 }
 
+/* infinite: 무한 반복 */
 .loading-dot { animation: dotPulse 1.2s ease-in-out infinite; }
