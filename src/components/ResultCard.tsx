@@ -113,7 +113,7 @@ export default function ResultCard({ total, tier, onReset }: Props) {
       vibrate([200, 50, 100]);
       triggerShake(false);
       const trash = confetti.shapeFromText({ text: '🗑️', scalar: 2 });
-      confetti({ shapes: [trash], particleCount: 30, spread: 180, origin: { y: 0.5 }, startVelocity: 20, scalar: 2 });
+      confetti({ shapes: [trash], particleCount: 12, spread: 180, origin: { y: 0.5 }, startVelocity: 20, scalar: 2 });
 
     } else if (tier === 'broken') {
       // 해골 이모지 3연속 폭발 + 강한 진동
@@ -122,7 +122,7 @@ export default function ResultCard({ total, tier, onReset }: Props) {
       const skull = confetti.shapeFromText({ text: '💀', scalar: 2 });
       [0.2, 0.5, 0.8].forEach((x, i) => {
         pendingTimers.current.push(setTimeout(() => {
-          confetti({ shapes: [skull], particleCount: 25, spread: 360, startVelocity: 28, scalar: 2, origin: { x, y: 0.5 } });
+          confetti({ shapes: [skull], particleCount: 10, spread: 360, startVelocity: 28, scalar: 2, origin: { x, y: 0.5 } });
         }, i * 160));
       });
     }
