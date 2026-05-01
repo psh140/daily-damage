@@ -61,6 +61,26 @@ export default function ResultCard({ total, tier, onReset }: Props) {
   const [comment] = useState(() => pickComment(tier));
   const pendingTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  // 웹 워커에서 렌더링하는 confetti 인스턴스 — 메인 스레드 부하 없음
+  const fireConfetti = useRef<confetti.CreateTypes | null>(null);
+  // 탭마다 shapeFromText 재호출 방지용 — 마운트 시 한 번만 생성
+  const skullShape = useRef<confetti.Shape | null>(null);
+  const trashShape = useRef<confetti.Shape | null>(null);
+
+  useEffect(() => {
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;';
+    document.body.appendChild(canvas);
+    fireConfetti.current = confetti.create(canvas, { resize: true, useWorker: true });
+    skullShape.current = confetti.shapeFromText({ text: '💀', scalar: 2 });
+    trashShape.current = confetti.shapeFromText({ text: '🗑️', scalar: 2 });
+    return () => {
+      fireConfetti.current?.reset();
+      document.body.removeChild(canvas);
+      pendingTimers.current.forEach(clearTimeout);
+    };
+  }, []);
+
   // sighKey: 탭할 때마다 증가 → key prop으로 전달해 애니메이션 재실행
   const [sighKey, setSighKey] = useState(0);
   const [showSigh, setShowSigh] = useState(false);
@@ -86,22 +106,22 @@ export default function ResultCard({ total, tier, onReset }: Props) {
 
   // 화면 탭 시 등급별로 다른 이펙트 실행
   function handleTap() {
+    const fire = fireConfetti.current;
+    if (!fire) return;
+
     if (tier === 'perfect') {
-      // 꽃가루 + 양쪽 축포 + 긴 진동
       vibrate([100, 50, 200, 50, 300]);
-      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+      fire({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       pendingTimers.current.push(
-        setTimeout(() => confetti({ particleCount: 35, angle: 60,  spread: 55, origin: { x: 0, y: 0.7 } }), 250),
-        setTimeout(() => confetti({ particleCount: 35, angle: 120, spread: 55, origin: { x: 1, y: 0.7 } }), 400),
+        setTimeout(() => fire({ particleCount: 35, angle: 60,  spread: 55, origin: { x: 0, y: 0.7 } }), 250),
+        setTimeout(() => fire({ particleCount: 35, angle: 120, spread: 55, origin: { x: 1, y: 0.7 } }), 400),
       );
 
     } else if (tier === 'good') {
-      // 초록 꽃가루 + 짧은 진동
       vibrate([100]);
-      confetti({ particleCount: 25, spread: 50, origin: { y: 0.65 }, colors: ['#16A34A', '#22C55E', '#86EFAC', '#FFFFFF'] });
+      fire({ particleCount: 25, spread: 50, origin: { y: 0.65 }, colors: ['#16A34A', '#22C55E', '#86EFAC', '#FFFFFF'] });
 
     } else if (tier === 'meh') {
-      // 화면 흔들림 + 한숨 텍스트 표시 + 짧은 진동
       vibrate([50]);
       triggerShake(false);
       setSighKey(k => k + 1);
@@ -109,20 +129,16 @@ export default function ResultCard({ total, tier, onReset }: Props) {
       pendingTimers.current.push(setTimeout(() => setShowSigh(false), 3600));
 
     } else if (tier === 'bad') {
-      // 쓰레기통 이모지 파티클 + 중간 진동
       vibrate([200, 50, 100]);
       triggerShake(false);
-      const trash = confetti.shapeFromText({ text: '🗑️', scalar: 2 });
-      confetti({ shapes: [trash], particleCount: 12, spread: 180, origin: { y: 0.5 }, startVelocity: 20, scalar: 2 });
+      fire({ shapes: [trashShape.current!], particleCount: 12, spread: 180, origin: { y: 0.5 }, startVelocity: 20, scalar: 2 });
 
     } else if (tier === 'broken') {
-      // 해골 이모지 3연속 폭발 + 강한 진동
       vibrate([500, 100, 500]);
       triggerShake(true);
-      const skull = confetti.shapeFromText({ text: '💀', scalar: 2 });
       [0.2, 0.5, 0.8].forEach((x, i) => {
         pendingTimers.current.push(setTimeout(() => {
-          confetti({ shapes: [skull], particleCount: 10, spread: 360, startVelocity: 28, scalar: 2, origin: { x, y: 0.5 } });
+          fire({ shapes: [skullShape.current!], particleCount: 10, spread: 360, startVelocity: 28, scalar: 2, origin: { x, y: 0.5 } });
         }, i * 160));
       });
     }
