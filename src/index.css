@@ -1,0 +1,83 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+  min-height: 100vh;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%  { transform: translateX(-10px); }
+  30%  { transform: translateX(10px); }
+  45%  { transform: translateX(-8px); }
+  60%  { transform: translateX(8px); }
+  75%  { transform: translateX(-4px); }
+  90%  { transform: translateX(4px); }
+}
+
+@keyframes shake-intense {
+  0%,  100% { transform: translate(0, 0) rotate(0deg); }
+  10%  { transform: translate(-20px, -5px) rotate(-1.5deg); }
+  20%  { transform: translate(20px,   5px) rotate(1.5deg); }
+  30%  { transform: translate(-15px, -3px) rotate(-1deg); }
+  40%  { transform: translate(15px,   3px) rotate(1deg); }
+  50%  { transform: translate(-10px, -2px); }
+  60%  { transform: translate(10px,   2px); }
+  70%  { transform: translate(-5px,  -1px); }
+  80%  { transform: translate(5px,    1px); }
+  90%  { transform: translate(-2px,   0); }
+}
+
+.shake         { animation: shake         0.5s ease-in-out; }
+.shake-intense { animation: shake-intense 0.7s ease-in-out; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up  { animation: fadeUp  0.3s ease-out; }
+.slide-up { animation: slideUp 0.45s ease-out; }
+
+@keyframes sighAnim {
+  0%   { opacity: 0; transform: translateY(6px); }
+  12%  { opacity: 1; transform: translateY(0); }
+  80%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+
+.sigh-text {
+  animation: sighAnim 3.5s ease-in-out forwards;
+  font-size: 1.6rem;
+  font-weight: 700;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.loading-dot { animation: dotPulse 1.2s ease-in-out infinite; }
