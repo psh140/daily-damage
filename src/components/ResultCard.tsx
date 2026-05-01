@@ -86,24 +86,19 @@ export default function ResultCard({ total, tier, onReset }: Props) {
 
   // 화면 탭 시 등급별로 다른 이펙트 실행
   function handleTap() {
-    // 이전 파티클 및 대기 중인 타이머 모두 취소 후 새로 시작 — 누적 방지
-    confetti.reset();
-    pendingTimers.current.forEach(clearTimeout);
-    pendingTimers.current = [];
-
     if (tier === 'perfect') {
       // 꽃가루 + 양쪽 축포 + 긴 진동
       vibrate([100, 50, 200, 50, 300]);
-      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, ticks: 80 });
       pendingTimers.current.push(
-        setTimeout(() => confetti({ particleCount: 60, angle: 60,  spread: 55, origin: { x: 0, y: 0.7 } }), 250),
-        setTimeout(() => confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1, y: 0.7 } }), 400),
+        setTimeout(() => confetti({ particleCount: 60, angle: 60,  spread: 55, origin: { x: 0, y: 0.7 }, ticks: 80 }), 250),
+        setTimeout(() => confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, ticks: 80 }), 400),
       );
 
     } else if (tier === 'good') {
       // 초록 꽃가루 + 짧은 진동
       vibrate([100]);
-      confetti({ particleCount: 50, spread: 50, origin: { y: 0.65 }, colors: ['#16A34A', '#22C55E', '#86EFAC', '#FFFFFF'] });
+      confetti({ particleCount: 50, spread: 50, origin: { y: 0.65 }, colors: ['#16A34A', '#22C55E', '#86EFAC', '#FFFFFF'], ticks: 80 });
 
     } else if (tier === 'meh') {
       // 화면 흔들림 + 한숨 텍스트 표시 + 짧은 진동
@@ -118,7 +113,7 @@ export default function ResultCard({ total, tier, onReset }: Props) {
       vibrate([200, 50, 100]);
       triggerShake(false);
       const trash = confetti.shapeFromText({ text: '🗑️', scalar: 2 });
-      confetti({ shapes: [trash], particleCount: 60, spread: 180, origin: { y: 0.5 }, startVelocity: 20, scalar: 2 });
+      confetti({ shapes: [trash], particleCount: 60, spread: 180, origin: { y: 0.5 }, startVelocity: 20, scalar: 2, ticks: 80 });
 
     } else if (tier === 'broken') {
       // 해골 이모지 3연속 폭발 + 강한 진동
@@ -127,7 +122,7 @@ export default function ResultCard({ total, tier, onReset }: Props) {
       const skull = confetti.shapeFromText({ text: '💀', scalar: 2 });
       [0.2, 0.5, 0.8].forEach((x, i) => {
         pendingTimers.current.push(setTimeout(() => {
-          confetti({ shapes: [skull], particleCount: 50, spread: 360, startVelocity: 28, scalar: 2, origin: { x, y: 0.5 } });
+          confetti({ shapes: [skull], particleCount: 50, spread: 360, startVelocity: 28, scalar: 2, origin: { x, y: 0.5 }, ticks: 80 });
         }, i * 160));
       });
     }
