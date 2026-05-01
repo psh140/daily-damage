@@ -2,12 +2,13 @@ import type { Question, Score } from '../types';
 
 interface Props {
   question: Question;
-  index: number;
-  total: number;
+  index: number;   // 0부터 시작하는 현재 질문 번호
+  total: number;   // 전체 질문 수 (현재 7)
   onAnswer: (score: Score) => void;
 }
 
 export default function QuestionCard({ question, index, total, onAnswer }: Props) {
+  // 진행 바 너비 계산 (현재 질문 기준, 1번 질문부터 꽉 찬 느낌 주기 위해 +1)
   const progress = ((index + 1) / total) * 100;
 
   return (
@@ -22,10 +23,12 @@ export default function QuestionCard({ question, index, total, onAnswer }: Props
       margin: '0 auto',
       width: '100%',
     }}>
+      {/* 상단: 진행 표시 */}
       <div style={{ marginBottom: '2.5rem' }}>
         <div style={{ color: '#9CA3AF', fontSize: '0.85rem', marginBottom: '0.6rem' }}>
           {index + 1} / {total}
         </div>
+        {/* 진행 바 */}
         <div style={{ height: '3px', background: '#F3F4F6', borderRadius: '2px' }}>
           <div style={{
             height: '100%',
@@ -37,6 +40,7 @@ export default function QuestionCard({ question, index, total, onAnswer }: Props
         </div>
       </div>
 
+      {/* 질문 텍스트 — key를 question.id로 줘서 질문 바뀔 때마다 fade-up 재실행 */}
       <h2
         key={question.id}
         className="fade-up"
@@ -51,10 +55,11 @@ export default function QuestionCard({ question, index, total, onAnswer }: Props
         {question.text}
       </h2>
 
+      {/* 선택지 버튼 목록 — 클릭하면 즉시 다음 질문으로 넘어감 (별도 확인 없음) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {question.options.map((option, i) => (
           <button
-            key={i}
+            key={`${question.id}-${i}`}
             onClick={() => onAnswer(option.score)}
             style={{
               padding: '1rem 1.25rem',
@@ -67,8 +72,9 @@ export default function QuestionCard({ question, index, total, onAnswer }: Props
               cursor: 'pointer',
               lineHeight: '1.55',
               transition: 'border-color 0.12s, background 0.12s',
-              WebkitAppearance: 'none',
+              WebkitAppearance: 'none', // iOS Safari 기본 버튼 스타일 제거
             }}
+            // 마우스/터치 hover 효과를 인라인으로 처리 (CSS 클래스 없이)
             onMouseEnter={e => {
               e.currentTarget.style.borderColor = '#374151';
               e.currentTarget.style.background = '#F3F4F6';
